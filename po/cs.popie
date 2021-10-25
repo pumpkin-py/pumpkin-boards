@@ -31,5 +31,5 @@ msgstr Nejhorších {limit}
 msgid Best {limit}
 msgstr Nejlepších {limit}
 
-msgid , page {offset}
-msgstr , stránka {offset}.
+msgid , position {offset}
+msgstr , pozice {offset}.
