@@ -84,7 +84,7 @@ class Points(commands.Cog):
         )
                 
         users = UserStats.get_best(ctx.guild.id, "desc", self.board_limit, offset=0)
-        value = self._getBoard(ctx.guild, ctx.author, users)
+        value = Points._getBoard(ctx.guild, ctx.author, users)
         
         embed.add_field(
             name=_(ctx, "Top {limit}".format(limit=self.board_limit)),
@@ -120,7 +120,7 @@ class Points(commands.Cog):
         )
         
         users = UserStats.get_best(ctx.guild.id, "asc", limit=self.board_limit, offset=0)
-        value = self._getBoard(ctx.guild, ctx.author, users)
+        value = Points._getBoard(ctx.guild, ctx.author, users)
         
         embed.add_field(
             name=_(ctx, "Worst {limit}".format(limit=self.board_limit)),
@@ -237,7 +237,7 @@ class Points(commands.Cog):
             return await utils.Discord.remove_reaction(reaction.message, reaction, user)
 
         users = repo_p.getUsers(order, limit=self.config.get("board"), offset=offset)
-        value = self._getBoard(reaction.message.guild, user, users)
+        value = Points._getBoard(reaction.message.guild, user, users)
         if not value:
             # offset too big
             return await utils.Discord.remove_reaction(reaction.message, reaction, user)
