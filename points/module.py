@@ -231,14 +231,14 @@ class Points(commands.Cog):
         if str(reaction) == "⏪":
             offset = 0
         elif str(reaction) == "◀":
-            offset -= self.config.get("board")
+            offset -= self.board_limit
         elif str(reaction) == "▶":
-            offset += self.config.get("board")
+            offset += self.board_limit
 
         if offset < 0:
             return await utils.Discord.remove_reaction(reaction.message, reaction, user)
 
-        users = repo_p.getUsers(order, limit=self.config.get("board"), offset=offset)
+        users = repo_p.getUsers(order, limit=self.board_limit, offset=offset)
         value = Points._getBoard(reaction.message.guild, user, users)
         if not value:
             # offset too big
