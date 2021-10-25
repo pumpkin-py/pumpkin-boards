@@ -30,7 +30,7 @@ class Points(commands.Cog):
         self.timer_message = 60
         self.timer_reaction = 30
         
-        limit = 10
+        self.board_limit = 10
 
         self.cleanup.start()
 
@@ -303,9 +303,9 @@ class Points(commands.Cog):
                     delete.append(uid)
             for uid in delete:
                 self.stats_message[guild].pop(uid)
-                
-            delete = []
             
+        for guild in self.stats_reaction.keys():
+            delete = []
             for uid, time in self.stats_reaction[guild].items():
                 if (datetime.datetime.now() - time).total_seconds() >= self.timer_reaction:
                     delete.append(uid)
