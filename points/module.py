@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands, tasks
 
 import database.config
-from core import utils, i18n
+from core import utils, i18n, TranslationContext
 
 from .database import UserStats
 
