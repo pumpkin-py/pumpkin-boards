@@ -206,6 +206,8 @@ class Points(commands.Cog):
         if str(reaction) not in ("⏪", "◀", "▶"):
             return
             
+        ctx = TranslationContext(guild_id, user.id)
+            
         if len(reaction.message.embeds) != 1 \
         or type(reaction.message.embeds[0].title) != str \
         or not reaction.message.embeds[0].title.startswith(_(ctx, "Points ")):
