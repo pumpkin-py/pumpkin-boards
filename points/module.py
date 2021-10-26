@@ -124,7 +124,7 @@ class Points(commands.Cog):
 
         # if the user is not present, add them to second field
         if ctx.author.id not in [u.user_id for u in users]:
-            author = repo_p.get(ctx.author.id)
+            author = UserStats.get(ctx.guild.id, ctx.author.id)
 
             embed.add_field(
                 name=_(ctx, "Your score"),
@@ -267,12 +267,13 @@ class Points(commands.Cog):
     ) -> str:
         result = []
         template = "`{points:>8}` … {name}"
+        ctx = TranslationContext(guild_id, user.id)
         for db_user in users:
             user = guild.get_member(db_user.user_id)
             if user and user.display_name:
                 name = utils.Text.sanitise(user.display_name, limit=1900)
             else:
-                name = self.text.get("unknown")
+                name = _(ctx, "Unknown")
 
             if db_user.user_id == author.id:
                 name = "**" + name + "**"
