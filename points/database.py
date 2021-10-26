@@ -68,8 +68,6 @@ class UserStats(database.base):
             order = UserStats.points.desc()
         elif order == BoardOrder.ASC:
             order = UserStats.points.asc()
-        else:
-            raise Exception("Invalid order: " + order)
 
         query = (
             session.query(UserStats)

@@ -13,7 +13,6 @@ from .database import UserStats, BoardOrder
 _ = i18n.Translator("modules/boards").translate
 config = database.config.Config.get()
 
-# This should be configurable
 LIMITS_MESSAGE = [15, 25]
 LIMITS_REACTION = [0, 5]
 
@@ -52,8 +51,8 @@ class Points(commands.Cog):
 
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=config.prefix + ctx.command.qualified_name,
-            description=_(ctx, ("**{user}'s** points")).format(
+            title=_(ctx, "Points"),
+            description=_(ctx, "**{user}'s** points").format(
                 user=utils.Text.sanitise(member.display_name)
             ),
         )

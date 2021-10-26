@@ -1,3 +1,6 @@
+msgid Points
+msgstr Body
+
 msgid **{user}'s** points
 msgstr Body uživatele **{user}**
 
@@ -29,4 +32,4 @@ msgid Best {limit}
 msgstr Nejlepších {limit}
 
 msgid , position {offset}
-msgstr , pozice {offset}
+msgstr , pozice {offset}.
