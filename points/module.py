@@ -158,7 +158,6 @@ class Points(commands.Cog):
         if not isinstance(message.channel, discord.TextChannel):
             return
 
-        now = datetime.datetime.now()
 
         value = random.randint(LIMITS_MESSAGE[0], LIMITS_MESSAGE[1])
 
@@ -180,8 +179,6 @@ class Points(commands.Cog):
             return
 
         # add points
-        now = datetime.datetime.now()
-
         guild_id = reaction.message.guild.id
 
         value = random.randint(LIMITS_REACTION[0], LIMITS_REACTION[1])
@@ -295,6 +292,7 @@ class Points(commands.Cog):
     def _handle_points(
         guild_id: int, user_id: int, stats: Dict, timer: int, value: int
     ):
+        now = datetime.datetime.now()
         if not guild_id in stats:
             stats[guild_id] = {}
 
