@@ -205,10 +205,10 @@ class Points(commands.Cog):
         embed = reaction.message.embeds[0]
 
         # get ordering
-        if embed.title.endswith(_(ctx, "Points 🏆")):
-            order = BoardOrder.DESC
-        else:
+        if embed.title.endswith(_(ctx, "Points 💩")):
             order = BoardOrder.ASC
+        else:
+            order = BoardOrder.DESC
 
         # get current offset
         if ", " in embed.fields[0].name:
@@ -241,7 +241,7 @@ class Points(commands.Cog):
         name = table_name.format(limit=10)
 
         if offset:
-            name += _(ctx, ", position {offset}".format(offset=offset + 1))
+            name += _(ctx, ", position {offset}").format(offset=offset + 1)
 
         embed.clear_fields()
         embed.add_field(name=name, value=value, inline=False)
