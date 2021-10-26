@@ -83,7 +83,7 @@ class Points(commands.Cog):
         value = Points._get_board(ctx.guild, ctx.author, users)
 
         embed.add_field(
-            name=_(ctx, "Top {limit}".format(limit=10)),
+            name=_(ctx, "Top {limit}").format(limit=10),
             value=value,
             inline=False,
         )
@@ -120,7 +120,7 @@ class Points(commands.Cog):
         value = Points._get_board(ctx.guild, ctx.author, users)
 
         embed.add_field(
-            name=_(ctx, "Worst {limit}".format(limit=10)),
+            name=_(ctx, "Worst {limit}").format(limit=10),
             value=value,
             inline=False,
         )
