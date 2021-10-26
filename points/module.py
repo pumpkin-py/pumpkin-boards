@@ -1,6 +1,6 @@
 import datetime
 import random
-from typing import Union
+from typing import Union, Dict
 
 import discord
 from discord.ext import commands, tasks
@@ -293,7 +293,7 @@ class Points(commands.Cog):
 
     @staticmethod
     def _handle_points(
-        guild_id: int, user_id: int, stats: Dictionary, timer: int, value: int
+        guild_id: int, user_id: int, stats: Dict, timer: int, value: int
     ):
         if not guild_id in stats:
             stats[guild_id] = {}
