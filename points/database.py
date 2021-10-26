@@ -66,7 +66,7 @@ class UserStats(database.base):
     def get_best(guild_id: int, order: BoardOrder, limit: int = 10, offset: int = 0):
         if order == BoardOrder.DESC:
             order = UserStats.points.desc()
-        elif order == BoardOrder.DESC:
+        elif order == BoardOrder.ASC:
             order = UserStats.points.asc()
         else:
             raise Exception("Invalid order: " + order)
