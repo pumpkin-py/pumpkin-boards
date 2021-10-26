@@ -8,10 +8,18 @@ from discord.ext import commands, tasks
 import database.config
 from core import utils, i18n, TranslationContext
 
-from .database import UserStats
+from .database import UserStats, BoardOrder
 
-_ = i18n.Translator("modules/fun").translate
+_ = i18n.Translator("modules/boards").translate
 config = database.config.Config.get()
+
+# This should be configurable
+LIMITS_MESSAGE = [15, 25]
+LIMITS_REACTION = [0, 5]
+
+TIMER_MESSAGE = 60
+TIMER_REACTION = 30
+
 
 class Points(commands.Cog):
     """Get points by having conversations"""
@@ -21,16 +29,6 @@ class Points(commands.Cog):
 
         self.stats_message = {}
         self.stats_reaction = {}
-        
-        # This should be configurable
-        self.limits_message = [15, 25]
-        
-        self.limits_reaction = [0, 5]
-        
-        self.timer_message = 60
-        self.timer_reaction = 30
-        
-        self.board_limit = 10
 
         self.cleanup.start()
 
@@ -39,12 +37,12 @@ class Points(commands.Cog):
     ##
 
     @commands.guild_only()
-    @commands.group(name="points", aliases=["body"])
+    @commands.group(name="points")
     async def points(self, ctx):
         """Get information about user points"""
         await utils.Discord.send_help(ctx)
 
-    @points.command(name="get", aliases=["gde", "me", "stalk"])
+    @points.command(name="get")
     async def points_get(self, ctx, member: discord.Member = None):
         """Get user points"""
         if member is None:
@@ -54,40 +52,38 @@ class Points(commands.Cog):
 
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title = config.prefix + ctx.command.qualified_name,
-            description=_(
-                ctx,
-                (
-                    "**{user}'s** points".format(user=utils.Text.sanitise(member.display_name))
-                )
-            )
+            title=config.prefix + ctx.command.qualified_name,
+            description=_(ctx, ("**{user}'s** points")).format(
+                user=utils.Text.sanitise(member.display_name)
+            ),
         )
         points = getattr(result, "points", 0)
-        message = ("**{points}** ({position}.)".format(points=points,position=UserStats.get_position(ctx.guild.id, points)))
-        
+        message = "**{points}** ({position}.)".format(
+            points=points, position=UserStats.get_position(ctx.guild.id, points)
+        )
+
         embed.set_thumbnail(url=member.display_avatar.replace(size=256).url)
         embed.add_field(
-            name=_(ctx, ("Points and ranking")),
+            name=_(ctx, "Points and ranking"),
             value=_(ctx, message),
         )
         await ctx.send(embed=embed)
         await utils.Discord.delete_message(ctx.message)
 
-
-    @points.command(name="leaderboard", aliases=["🏆"])
+    @points.command(name="leaderboard")
     async def points_leaderboard(self, ctx):
         """Points leaderboard"""
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=_(ctx, "Points ") + _(ctx, ("🏆")),
-            description=_(ctx, "Score, descending")
+            title=_(ctx, "Points 🏆"),
+            description=_(ctx, "Score, descending"),
         )
-                
-        users = UserStats.get_best(ctx.guild.id, "desc", self.board_limit, offset=0)
-        value = Points._getBoard(ctx.guild, ctx.author, users)
-        
+
+        users = UserStats.get_best(ctx.guild.id, BoardOrder.DESC, 10, offset=0)
+        value = Points._get_board(ctx.guild, ctx.author, users)
+
         embed.add_field(
-            name=_(ctx, "Top {limit}".format(limit=self.board_limit)),
+            name=_(ctx, "Top {limit}".format(limit=10)),
             value=value,
             inline=False,
         )
@@ -99,7 +95,8 @@ class Points(commands.Cog):
             embed.add_field(
                 name=_(ctx, "Your score"),
                 value="`{points:>8}` … {name}".format(
-                    points=author.points, name="**" + utils.Text.sanitise(ctx.author.display_name) + "**"
+                    points=author.points,
+                    name="**" + utils.Text.sanitise(ctx.author.display_name) + "**",
                 ),
                 inline=False,
             )
@@ -110,20 +107,20 @@ class Points(commands.Cog):
         await message.add_reaction("▶")
         await utils.Discord.delete_message(ctx.message)
 
-    @points.command(name="loserboard", aliases=["💩"])
+    @points.command(name="loserboard")
     async def points_loserboard(self, ctx):
         """Points loserboard"""
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=_(ctx, "Points ") + _(ctx, ("💩")),
-            description=_(ctx, "Score, ascending")
+            title=_(ctx, "Points 💩"),
+            description=_(ctx, "Score, ascending"),
         )
-        
-        users = UserStats.get_best(ctx.guild.id, "asc", limit=self.board_limit, offset=0)
-        value = Points._getBoard(ctx.guild, ctx.author, users)
-        
+
+        users = UserStats.get_best(ctx.guild.id, BoardOrder.ASC, limit=10, offset=0)
+        value = Points._get_board(ctx.guild, ctx.author, users)
+
         embed.add_field(
-            name=_(ctx, "Worst {limit}".format(limit=self.board_limit)),
+            name=_(ctx, "Worst {limit}".format(limit=10)),
             value=value,
             inline=False,
         )
@@ -135,7 +132,8 @@ class Points(commands.Cog):
             embed.add_field(
                 name=_(ctx, "Your score"),
                 value="`{points:>8}` … {name}".format(
-                    points=author.points, name="**" + utils.Text.sanitise(ctx.author.display_name) + "**"
+                    points=author.points,
+                    name="**" + utils.Text.sanitise(ctx.author.display_name) + "**",
                 ),
                 inline=False,
             )
@@ -161,21 +159,16 @@ class Points(commands.Cog):
             return
 
         now = datetime.datetime.now()
-        
-        if not message.guild.id in self.stats_message:
-            self.stats_message[message.guild.id] = {}
 
-        if (
-            str(message.author.id) in self.stats_message[message.guild.id]
-            and (now - self.stats_message[message.guild.id][str(message.author.id)]).total_seconds()
-            < self.timer_message
-        ):
-            return
+        value = random.randint(LIMITS_MESSAGE[0], LIMITS_MESSAGE[1])
 
-        value = random.randint(self.limits_message[0], self.limits_message[1])
-        self.stats_message[message.guild.id][str(message.author.id)] = now
-        UserStats.increment(message.guild.id, message.author.id, value)
-
+        Points._handle_points(
+            message.guild.id,
+            message.author.id,
+            self.stats_message,
+            TIMER_MESSAGE,
+            value,
+        )
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -188,38 +181,37 @@ class Points(commands.Cog):
 
         # add points
         now = datetime.datetime.now()
-        
-        guild_id = reaction.message.guild.id;
-        
-        
-        if not guild_id in self.stats_reaction:
-            self.stats_reaction[guild_id] = {}
-        
-        if (
-            str(user.id) not in self.stats_reaction[guild_id]
-            or (now - self.stats_reaction[guild_id][str(user.id)]).total_seconds() >= self.timer_reaction
-        ):
-            value = random.randint(self.limits_reaction[0], self.limits_reaction[1])
-            self.stats_reaction[guild_id][str(user.id)] = now
-            UserStats.increment(guild_id, user.id, value)
+
+        guild_id = reaction.message.guild.id
+
+        value = random.randint(LIMITS_REACTION[0], LIMITS_REACTION[1])
+
+        Points._handle_points(
+            guild_id, user.id, self.stats_reaction, TIMER_REACTION, value
+        )
 
         if str(reaction) not in ("⏪", "◀", "▶"):
             return
-            
+
         ctx = TranslationContext(guild_id, user.id)
-            
-        if len(reaction.message.embeds) != 1 \
-        or type(reaction.message.embeds[0].title) != str \
-        or not reaction.message.embeds[0].title.startswith(_(ctx, "Points ")):
+
+        if (
+            len(reaction.message.embeds) != 1
+            or type(reaction.message.embeds[0].title) != str
+            or (
+                not reaction.message.embeds[0].title.startswith(_(ctx, "Points 🏆"))
+                and not reaction.message.embeds[0].title.startswith(_(ctx, "Points 💩"))
+            )
+        ):
             return
 
         embed = reaction.message.embeds[0]
 
         # get ordering
-        if embed.title.endswith(_(ctx, "🏆")):
-            order = "desc"
+        if embed.title.endswith(_(ctx, "Points 🏆")):
+            order = BoardOrder.DESC
         else:
-            order = "asc"
+            order = BoardOrder.ASC
 
         # get current offset
         if ", " in embed.fields[0].name:
@@ -231,26 +223,26 @@ class Points(commands.Cog):
         if str(reaction) == "⏪":
             offset = 0
         elif str(reaction) == "◀":
-            offset -= self.board_limit
+            offset -= 10
         elif str(reaction) == "▶":
-            offset += self.board_limit
+            offset += 10
 
         if offset < 0:
             return await utils.Discord.remove_reaction(reaction.message, reaction, user)
 
-        users = UserStats.get_best(guild_id, "asc", limit=self.board_limit, offset=0)
-        value = Points._getBoard(reaction.message.guild, user, users)
+        users = UserStats.get_best(guild_id, BoardOrder.ASC, limit=10, offset=0)
+        value = Points._get_board(reaction.message.guild, user, users)
         if not value:
             # offset too big
             return await utils.Discord.remove_reaction(reaction.message, reaction, user)
-    
-        if order == "desc":
+
+        if order == BoardOrder.DESC:
             table_name = _(ctx, "Best {limit}")
         else:
             table_name = _(ctx, "Worst {limit}")
-            
-        name = table_name.format(limit=self.board_limit)
-    
+
+        name = table_name.format(limit=10)
+
         if offset:
             name += _(ctx, ", position {offset}".format(offset=offset + 1))
 
@@ -264,7 +256,8 @@ class Points(commands.Cog):
             embed.add_field(
                 name=_(ctx, "Your score"),
                 value="`{points:>8}` … {name}".format(
-                    points=author.points, name="**" + utils.Text.sanitise(user.display_name) + "**"
+                    points=author.points,
+                    name="**" + utils.Text.sanitise(user.display_name) + "**",
                 ),
                 inline=False,
             )
@@ -276,7 +269,13 @@ class Points(commands.Cog):
     ## Helper functions
     ##
 
-    def _getBoard(guild: discord.Guild, author: Union[discord.User, discord.Member], users: list, offset: int = 0) -> str:
+    @staticmethod
+    def _get_board(
+        guild: discord.Guild,
+        author: Union[discord.User, discord.Member],
+        users: list,
+        offset: int = 0,
+    ) -> str:
         result = []
         template = "`{points:>8}` … {name}"
         for db_user in users:
@@ -292,6 +291,20 @@ class Points(commands.Cog):
             result.append(template.format(points=db_user.points, name=name))
         return "\n".join(result)
 
+    @staticmethod
+    def _handle_points(
+        guild_id: int, user_id: int, stats: Dictionary, timer: int, value: int
+    ):
+        if not guild_id in stats:
+            stats[guild_id] = {}
+
+        if (
+            user_id not in stats[guild_id]
+            or (now - stats[guild_id][user_id]).total_seconds() >= timer
+        ):
+            stats[guild_id][user_id] = now
+            UserStats.increment(guild_id, user_id, value)
+
     ##
     ## Tasks
     ##
@@ -301,20 +314,20 @@ class Points(commands.Cog):
         for guild in self.stats_message.keys():
             delete = []
             for uid, time in self.stats_message[guild].items():
-                if (datetime.datetime.now() - time).total_seconds() >= self.timer_message:
+                if (datetime.datetime.now() - time).total_seconds() >= TIMER_MESSAGE:
                     delete.append(uid)
             for uid in delete:
                 self.stats_message[guild].pop(uid)
-            
+
         for guild in self.stats_reaction.keys():
             delete = []
             for uid, time in self.stats_reaction[guild].items():
-                if (datetime.datetime.now() - time).total_seconds() >= self.timer_reaction:
+                if (datetime.datetime.now() - time).total_seconds() >= TIMER_REACTION:
                     delete.append(uid)
-                
+
             for uid in delete:
                 self.stats_reaction[guild].pop(uid)
-            
+
 
 def setup(bot) -> None:
     bot.add_cog(Points(bot))

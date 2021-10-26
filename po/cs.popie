@@ -4,11 +4,8 @@ msgstr Body uživatele **{user}**
 msgid Points and ranking
 msgstr Body a žebříčky
 
-msgid Points 
-msgstr Body
-
-msgid 🏆
-msgstr 🏆
+msgid Points 🏆
+msgstr Body 🏆
 
 msgid Score, descending
 msgstr Skóre, sestupně
@@ -19,8 +16,8 @@ msgstr Top {limit}
 msgid Your score
 msgstr Tvoje skóre
 
-msgid 💩
-msgstr 💩
+msgid Points 💩
+msgstr Body 💩
 
 msgid Score, ascending
 msgstr Skóre, vzestupně
