@@ -158,7 +158,6 @@ class Points(commands.Cog):
         if not isinstance(message.channel, discord.TextChannel):
             return
 
-
         value = random.randint(LIMITS_MESSAGE[0], LIMITS_MESSAGE[1])
 
         Points._handle_points(
