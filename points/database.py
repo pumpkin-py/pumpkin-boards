@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Tuple
 
-from sqlalchemy import BigInteger, Column, Integer, String, func
+from sqlalchemy import BigInteger, Column, Integer, func
 
 from database import database, session
 

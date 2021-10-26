@@ -31,9 +31,9 @@ class Points(commands.Cog):
 
         self.cleanup.start()
 
-    ##
-    ## Commands
-    ##
+    """
+       Commands
+    """
 
     @commands.guild_only()
     @commands.group(name="points")
@@ -143,9 +143,9 @@ class Points(commands.Cog):
         await message.add_reaction("▶")
         await utils.Discord.delete_message(ctx.message)
 
-    ##
-    ## Listeners
-    ##
+    """
+       Listeners
+    """
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -260,9 +260,9 @@ class Points(commands.Cog):
         await reaction.message.edit(embed=embed)
         await utils.Discord.remove_reaction(reaction.message, reaction, user)
 
-    ##
-    ## Helper functions
-    ##
+    """
+       Helper functions
+    """
 
     @staticmethod
     def _get_board(
@@ -291,7 +291,7 @@ class Points(commands.Cog):
         guild_id: int, user_id: int, stats: Dict, timer: int, value: int
     ):
         now = datetime.datetime.now()
-        if not guild_id in stats:
+        if guild_id not in stats:
             stats[guild_id] = {}
 
         if (
@@ -301,9 +301,9 @@ class Points(commands.Cog):
             stats[guild_id][user_id] = now
             UserStats.increment(guild_id, user_id, value)
 
-    ##
-    ## Tasks
-    ##
+    """
+       Tasks
+    """
 
     @tasks.loop(seconds=120.0)
     async def cleanup(self):
