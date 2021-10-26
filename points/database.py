@@ -71,7 +71,7 @@ class UserStats(database.base):
         else:
             raise Exception("Invalid order: " + order)
 
-        qury = (
+        query = (
             session.query(UserStats)
             .filter_by(guild_id=guild_id)
             .order_by(order)
