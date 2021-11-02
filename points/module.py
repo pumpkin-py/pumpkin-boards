@@ -182,7 +182,7 @@ class Points(commands.Cog):
             value = Points._get_page(ctx.guild, ctx.author, users)
 
             page.add_field(
-                name=_(ctx, "Top {limit}").format(page_count * element_count),
+                name=_(ctx, "Top {limit}").format(limit=(page_count * element_count)),
                 value=value,
                 inline=False,
             )
