@@ -84,9 +84,15 @@ class Points(commands.Cog):
 
         await utils.Discord.delete_message(ctx.message)
 
-        scrollable_embed = utils.ScrollableEmbed()
-        scrollable_embed.from_iter(ctx, embeds)
-        await scrollable_embed.scroll(ctx)
+        if len(embeds) > 1:
+            scrollable_embed = utils.ScrollableEmbed()
+            scrollable_embed.from_iter(ctx, embeds)
+            await scrollable_embed.scroll(ctx)
+        elif len(embeds) == 1:
+            await ctx.send(embed=embeds[0])
+        else:
+            await ctx.send(_(ctx, "No stats found."))
+        
 
     @points.command(name="loserboard")
     async def points_loserboard(self, ctx):
@@ -105,9 +111,14 @@ class Points(commands.Cog):
 
         await utils.Discord.delete_message(ctx.message)
 
-        scrollable_embed = utils.ScrollableEmbed()
-        scrollable_embed.from_iter(ctx, embeds)
-        await scrollable_embed.scroll(ctx)
+        if len(embeds) > 1:
+            scrollable_embed = utils.ScrollableEmbed()
+            scrollable_embed.from_iter(ctx, embeds)
+            await scrollable_embed.scroll(ctx)
+        elif len(embeds) == 1:
+            await ctx.send(embed=embeds[0])
+        else:
+            await ctx.send(_(ctx, "No stats found."))
 
     # Listeners
 
