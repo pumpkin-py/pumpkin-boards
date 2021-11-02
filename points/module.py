@@ -152,7 +152,7 @@ class Points(commands.Cog):
         elements = []
 
         author = UserStats.get_stats(ctx.guild.id, ctx.author.id)
-        
+
         limit = min(UserStats.get_count(ctx.guild.id), page_count * element_count)
 
         for page_number in range(page_count):

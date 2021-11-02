@@ -50,13 +50,12 @@ class UserStats(database.base):
 
         session.merge(query)
         session.commit()
-        
+
     def get_count(guild_id: int) -> int:
-        query = (
-            session.query(func.count(UserStats.user_id))
-            .filter_by(guild_id=guild_id)        
+        query = session.query(func.count(UserStats.user_id)).filter_by(
+            guild_id=guild_id
         )
-        
+
         return query
 
     @staticmethod
