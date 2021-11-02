@@ -235,7 +235,6 @@ class Points(commands.Cog):
         await reaction.message.edit(embed=embed)
         await utils.Discord.remove_reaction(reaction.message, reaction, user)
 
-
     # Helper functions
 
     @staticmethod
