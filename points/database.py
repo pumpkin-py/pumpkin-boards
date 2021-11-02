@@ -74,6 +74,7 @@ class UserStats(database.base):
             .order_by(order)
             .offset(offset)
             .limit(limit)
+            .all()
         )
 
         return query
