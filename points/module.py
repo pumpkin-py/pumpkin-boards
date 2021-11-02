@@ -141,7 +141,6 @@ class Points(commands.Cog):
             value,
         )
 
-    async def on_reaction_add(self, reaction, user):
     # Helper functions
 
     @staticmethod
