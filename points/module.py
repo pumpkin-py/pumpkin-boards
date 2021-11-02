@@ -168,12 +168,9 @@ class Points(commands.Cog):
         elements = []
 
         for page_number in range(page_count):
-            users = UserStats.get_best(ctx.guild.id, order, element_count, page_number)
-            
-            print(users)
+            users = UserStats.get_best(ctx.guild.id, order, element_count, page_number * element_count)
 
             if not users:
-                print("break")
                 break
 
             page = utils.Discord.create_embed(
@@ -203,9 +200,7 @@ class Points(commands.Cog):
                 )
 
             elements.append(page)
-
-
-        print(len(elements))
+        
         return elements
 
     @staticmethod
