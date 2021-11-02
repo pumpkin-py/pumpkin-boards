@@ -70,7 +70,7 @@ class Points(commands.Cog):
     @points.command(name="leaderboard", aliases=["best"])
     async def points_leaderboard(self, ctx):
         """Points leaderboard"""
-        title = _(ctx, "Points 🏆")
+        title = _(ctx, "Points leaderboard")
         description = _(ctx, "Score, descending")
 
         embeds = Points._create_embeds(
@@ -96,7 +96,7 @@ class Points(commands.Cog):
     @points.command(name="loserboard", aliases=["worst"])
     async def points_loserboard(self, ctx):
         """Points loserboard"""
-        title = _(ctx, "Points 💩")
+        title = _(ctx, "Points loserboard")
         description = _(ctx, "Score, ascending")
 
         embeds = Points._create_embeds(
@@ -152,13 +152,13 @@ class Points(commands.Cog):
     ) -> str:
         result = []
         template = "`{points:>8}` … {name}"
-        ctx = TranslationContext(guild.id, author.id)
+        tc = TranslationContext(guild.id, author.id)
         for db_user in users:
             user = guild.get_member(db_user.user_id)
             if user and user.display_name:
                 name = utils.Text.sanitise(user.display_name, limit=1900)
             else:
-                name = _(ctx, "Unknown")
+                name = _(tc, "Unknown")
 
             if db_user.user_id == author.id:
                 name = "**" + name + "**"
@@ -174,8 +174,10 @@ class Points(commands.Cog):
         order: BoardOrder,
         element_count: int,
         page_count: int,
-    ) -> list[discord.Embed]:
+    ) -> List[discord.Embed]:
         elements = []
+        
+        author = UserStats.get_stats(ctx.guild.id, ctx.author.id)
 
         for page_number in range(page_count):
             users = UserStats.get_best(
@@ -200,8 +202,6 @@ class Points(commands.Cog):
             )
 
             if ctx.author.id not in [u.user_id for u in users]:
-                author = UserStats.get_stats(ctx.guild.id, ctx.author.id)
-
                 page.add_field(
                     name=_(ctx, "Your score"),
                     value="`{points:>8}` … {name}".format(
