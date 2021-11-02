@@ -92,7 +92,6 @@ class Points(commands.Cog):
             await ctx.send(embed=embeds[0])
         else:
             await ctx.send(_(ctx, "No stats found."))
-        
 
     @points.command(name="loserboard")
     async def points_loserboard(self, ctx):
@@ -179,7 +178,9 @@ class Points(commands.Cog):
         elements = []
 
         for page_number in range(page_count):
-            users = UserStats.get_best(ctx.guild.id, order, element_count, page_number * element_count)
+            users = UserStats.get_best(
+                ctx.guild.id, order, element_count, page_number * element_count
+            )
 
             if not users:
                 break
@@ -211,7 +212,7 @@ class Points(commands.Cog):
                 )
 
             elements.append(page)
-        
+
         return elements
 
     @staticmethod
