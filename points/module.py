@@ -79,7 +79,7 @@ class Points(commands.Cog):
             description=description,
             order=BoardOrder.DESC,
             element_count=10,
-            page_number=10,
+            page_count=10,
         )
 
         await utils.Discord.delete_message(ctx.message)
@@ -100,7 +100,7 @@ class Points(commands.Cog):
             description=description,
             order=BoardOrder.ASC,
             element_count=10,
-            page_number=10,
+            page_count=10,
         )
 
         await utils.Discord.delete_message(ctx.message)
