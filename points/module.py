@@ -176,7 +176,7 @@ class Points(commands.Cog):
         page_count: int,
     ) -> List[discord.Embed]:
         elements = []
-        
+
         author = UserStats.get_stats(ctx.guild.id, ctx.author.id)
 
         for page_number in range(page_count):
