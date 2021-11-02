@@ -54,7 +54,7 @@ class UserStats(database.base):
     def get_count(guild_id: int) -> int:
         query = session.query(func.count(UserStats.user_id)).filter_by(
             guild_id=guild_id
-        )
+        ).count()
 
         return query
 
