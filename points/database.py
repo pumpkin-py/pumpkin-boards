@@ -52,11 +52,11 @@ class UserStats(database.base):
         session.commit()
 
     def get_count(guild_id: int) -> int:
-        query = session.query(func.count(UserStats.user_id)).filter_by(
+        count = session.query(func.count(UserStats.user_id)).filter_by(
             guild_id=guild_id
         ).count()
 
-        return query
+        return count
 
     @staticmethod
     def get_position(guild_id: int, points: int) -> int:
