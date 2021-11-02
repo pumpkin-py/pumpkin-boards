@@ -4,7 +4,7 @@ from enum import Enum
 
 from sqlalchemy import BigInteger, Column, Integer, func
 
-from database import database, session
+from database import database, session, func
 
 
 class BoardOrder(Enum):
@@ -50,6 +50,14 @@ class UserStats(database.base):
 
         session.merge(query)
         session.commit()
+        
+    def get_count(guild_id: int) -> int:
+        query = (
+            session.query(func.count(UserStats.user_id))
+            .filter_by(guild_id=guild_id)        
+        )
+        
+        return query
 
     @staticmethod
     def get_position(guild_id: int, points: int) -> int:
