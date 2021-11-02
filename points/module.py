@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands, tasks
 
 import database.config
-from core import utils, i18n, TranslationContext
+from core import utils, i18n, TranslationContext, check
 
 from .database import UserStats, BoardOrder
 
@@ -35,6 +35,7 @@ class Points(commands.Cog):
 
     @commands.guild_only()
     @commands.group(name="points")
+    @commands.check(check.spamchannel)
     async def points(self, ctx):
         """Get information about user points"""
         await utils.Discord.send_help(ctx)
@@ -67,7 +68,7 @@ class Points(commands.Cog):
         await ctx.send(embed=embed)
         await utils.Discord.delete_message(ctx.message)
 
-    @points.command(name="leaderboard")
+    @points.command(name="leaderboard", aliases=["best"])
     async def points_leaderboard(self, ctx):
         """Points leaderboard"""
         title = _(ctx, "Points 🏆")
@@ -93,7 +94,7 @@ class Points(commands.Cog):
         else:
             await ctx.send(_(ctx, "No stats found."))
 
-    @points.command(name="loserboard")
+    @points.command(name="loserboard", aliases=["worst"])
     async def points_loserboard(self, ctx):
         """Points loserboard"""
         title = _(ctx, "Points 💩")
@@ -140,6 +141,100 @@ class Points(commands.Cog):
             TIMER_MESSAGE,
             value,
         )
+
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        """Handle board scrolling"""
+        if user.bot:
+            return
+
+        if getattr(reaction.message, "guild", None) is None:
+            return
+
+        # add points
+        guild_id = reaction.message.guild.id
+
+        value = random.randint(LIMITS_REACTION[0], LIMITS_REACTION[1])
+
+        Points._handle_points(
+            guild_id, user.id, self.stats_reaction, TIMER_REACTION, value
+        )
+
+        if str(reaction) not in ("⏪", "◀", "▶"):
+            return
+
+        tc = TranslationContext(guild_id, reaction.message.author.id)
+
+        if (
+            len(reaction.message.embeds) != 1
+            or type(reaction.message.embeds[0].title) != str
+            or (
+                not reaction.message.embeds[0].title.startswith(_(tc, "Points 🏆"))
+                and not reaction.message.embeds[0].title.startswith(_(tc, "Points 💩"))
+            )
+        ):
+            return
+
+        embed = reaction.message.embeds[0]
+
+        # get ordering
+        if embed.title == _(tc, "Points 💩"):
+            order = BoardOrder.ASC
+        else:
+            order = BoardOrder.DESC
+
+        # get current offset
+        if ", " in embed.fields[0].name:
+            offset = int(embed.fields[0].name.split(" ")[-1]) - 1
+        else:
+            offset = 0
+
+        # get new offset
+        if str(reaction) == "⏪":
+            offset = 0
+        elif str(reaction) == "◀":
+            offset -= 10
+        elif str(reaction) == "▶":
+            offset += 10
+
+        if offset < 0:
+            return await utils.Discord.remove_reaction(reaction.message, reaction, user)
+
+        users = UserStats.get_best(guild_id, order, 10, offset)
+        value = Points._get_board(reaction.message.guild, user, users)
+        if not value:
+            # offset too big
+            return await utils.Discord.remove_reaction(reaction.message, reaction, user)
+
+        if order == BoardOrder.DESC:
+            table_name = _(tc, "Best {limit}")
+        else:
+            table_name = _(tc, "Worst {limit}")
+
+        name = table_name.format(limit=10)
+
+        if offset:
+            name += _(tc, ", position {offset}").format(offset=offset + 1)
+
+        embed.clear_fields()
+        embed.add_field(name=name, value=value, inline=False)
+
+        # if the user is not present, add them to second field
+        if user.id not in [u.user_id for u in users]:
+            author = UserStats.get_stats(guild_id, user.id)
+
+            embed.add_field(
+                name=_(tc, "Your score"),
+                value="`{points:>8}` … {name}".format(
+                    points=author.points,
+                    name="**" + utils.Text.sanitise(user.display_name) + "**",
+                ),
+                inline=False,
+            )
+
+        await reaction.message.edit(embed=embed)
+        await utils.Discord.remove_reaction(reaction.message, reaction, user)
+
 
     # Helper functions
 
