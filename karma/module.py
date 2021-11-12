@@ -227,7 +227,7 @@ class Karma(commands.Cog):
 
             lines = [emoji_lists[i : i + 8] for i in range(0, len(emoji_lists), 8)]
 
-            lines = [" ".join(line) for line in lines.values()]
+            lines = [" ".join(line) for line in lines]
 
             messages = [lines[i : i + 3] for i in range(0, len(lines), 3)]
 
