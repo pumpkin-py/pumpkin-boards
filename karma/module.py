@@ -216,7 +216,7 @@ class Karma(commands.Cog):
         emojis_negative = [e for e in emojis if e.value < 0]
 
         def format_emojis(emojis) -> List[str]:
-            emoji_lists = {}
+            emoji_lists = []
             for i, emoji in enumerate(emojis):
                 if type(emoji) == UnicodeEmoji:
                     emoji_str = emoji.emoji
