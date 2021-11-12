@@ -233,6 +233,7 @@ class Karma(commands.Cog):
                 emoji_lists[idx].append(emoji_str)
 
             lines = [" ".join(line) for line in emoji_lists.values()]
+            lines = lines.replace("\n ", "\n")
             return lines
 
         if len(emojis_positive):
