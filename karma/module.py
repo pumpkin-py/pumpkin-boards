@@ -230,7 +230,7 @@ class Karma(commands.Cog):
             lines = [" ".join(line) for line in lines]
 
             messages = [lines[i : i + 3] for i in range(0, len(lines), 3)]
-            
+
             messages = ["\n".join(message) for message in messages]
 
             return messages
