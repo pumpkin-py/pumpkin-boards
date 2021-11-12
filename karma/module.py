@@ -223,18 +223,14 @@ class Karma(commands.Cog):
                 elif type(emoji) == DiscordEmoji:
                     emoji_str = f"<:pumpkin:{emoji.emoji_id}>"
 
-                idx = i // 24
+                emoji_lists.push(emoji_str)
 
-                if i % 8 == 0 and i % 24 != 0:
-                    emoji_lists[idx].append("\n")
+            lines = [emoji_lists[i : i + 8] for i in range(0, len(emoji_lists), 8)]
 
-                if i % 24 == 0:
-                    emoji_lists[idx] = []
-                emoji_lists[idx].append(emoji_str)
+            lines = [" ".join(line) for line in lines.values()]
 
-            lines = [
-                " ".join(line).replace("\n ", "\n") for line in emoji_lists.values()
-            ]
+            messages = [lines[i : i + 3] for i in range(0, len(lines), 3)]
+
             return lines
 
         if len(emojis_positive):
