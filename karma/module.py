@@ -1,6 +1,7 @@
 import asyncio
 import math
 import re
+from pathlib import Path
 from typing import Optional, List, Tuple, Union
 
 from emoji import UNICODE_EMOJI as _UNICODE_EMOJI
@@ -145,6 +146,49 @@ class Karma(commands.Cog):
     @commands.group(name="karma")
     async def karma_(self, ctx):
         await utils.Discord.send_help(ctx)
+
+    @commands.check(check.acl)
+    @karma_.command(name="import-users")
+    async def karma_import_users(self, ctx):
+        file = Path().home() / "karma-users.txt"
+        if not file.is_file():
+            await ctx.reply(f"File not found: {file!r}.")
+            return
+
+        i: int = 0
+        with open(file, "r") as handle:
+            for line in handle:
+                tokens = line.strip().split("\t")
+                user_id = int(tokens[0])
+                user = KarmaMember.get_or_add(ctx.guild.id, user_id)
+                user.value = int(tokens[1])
+                user.given = int(tokens[2])
+                user.taken = int(tokens[3])
+                user.save()
+                i += 1
+        await ctx.reply(f"Processed {i} users.")
+
+    @commands.check(check.acl)
+    @karma_.command(name="import-emojis")
+    async def karma_import_emojis(self, ctx):
+        file = Path().home() / "karma-emojis.txt"
+        if not file.is_file():
+            await ctx.reply(f"File not found: {file!r}.")
+            return
+
+        i: int = 0
+        with open(file, "r") as handle:
+            for line in handle:
+                tokens = line.strip().split("\t")
+                value = int(tokens[1])
+                try:
+                    emoji_id = int(tokens[0])
+                    DiscordEmoji.add(ctx.guild.id, emoji_id, value)
+                except ValueError:
+                    emoji_id = tokens[0]
+                    UnicodeEmoji.add(ctx.guild.id, emoji_id, value)
+                i += 1
+        await ctx.reply(f"Processed {i} emojis.")
 
     @commands.check(check.acl)
     @karma_.command(name="get")
