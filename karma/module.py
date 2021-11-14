@@ -129,6 +129,9 @@ class Karma(commands.Cog):
                 (f"Message {reaction.message_id} not found on karma reaction add."),
             )
 
+        if not check_result:
+            return
+
         author_m, author_r, emoji_value = check_result
 
         self.value_cache.setdefault(author_m, 0)
