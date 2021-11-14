@@ -318,6 +318,13 @@ class Karma(commands.Cog):
                 _(ctx, "All server emojis have been assigned a karma value.")
             )
             return
+            
+            
+        if emoji is not None and isinstance(emoji, discord.PartialEmoji):
+            emoji = next((x for x in ctx.guild.emojis if x.id == emoji.id), None)
+            if emoji is None:
+                await ctx.author.send(_(ctx, "That emoji is not from this server"))
+                return
 
         if type(emoji) == str and re.match(EMOJI_REGEX, emoji):
             found_emoji = discord.utils.get(
@@ -352,7 +359,7 @@ class Karma(commands.Cog):
 
         # Set the value to zero, so we can run this command multiple times
         # without starting a vote over the same emoji over and over.
-        if type(emoji) is discord.PartialEmoji:
+        if type(emoji) is discord.Emoji:
             DiscordEmoji.add(ctx.guild.id, emoji.id, 0)
 
         await guild_log.info(
