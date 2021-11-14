@@ -126,7 +126,7 @@ class Karma(commands.Cog):
             await guild_log.debug(
                 reaction.user_id,
                 reaction.channel_id,
-                (f"Message {reaction.message_id} not found on karma reaction add."),
+                f"Message {reaction.message_id} not found on karma reaction add.",
             )
 
         if not check_result:
@@ -153,7 +153,7 @@ class Karma(commands.Cog):
             await guild_log.debug(
                 reaction.user_id,
                 reaction.channel_id,
-                (f"Message {reaction.message_id} not found on karma reaction remove. "),
+                f"Message {reaction.message_id} not found on karma reaction remove.",
             )
         if not check_result:
             return
@@ -352,7 +352,7 @@ class Karma(commands.Cog):
         if emoji is not None and isinstance(emoji, discord.PartialEmoji):
             emoji = next((x for x in ctx.guild.emojis if x.id == emoji.id), None)
             if emoji is None:
-                await ctx.author.send(_(ctx, "That emoji is not from this server"))
+                await ctx.author.send(_(ctx, "That emoji is not from this server."))
                 return
 
         if isinstance(emoji, str) and re.match(EMOJI_REGEX, emoji):
